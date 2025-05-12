@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Sekolah</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Animations */
+    @keyframes marquee {
+      0%   { transform: translate(0, 0); }
+      100% { transform: translate(-100%, 0); }
+    }
+    
+    @keyframes rainbowBorder {
+      0%   { border-color: #ff0000; box-shadow: 0 0 5px #ff0000; }
+      14%  { border-color: #ff7f00; box-shadow: 0 0 5px #ff7f00; }
+      28%  { border-color: #ffff00; box-shadow: 0 0 5px #ffff00; }
+      42%  { border-color: #00ff00; box-shadow: 0 0 5px #00ff00; }
+      57%  { border-color: #0000ff; box-shadow: 0 0 5px #0000ff; }
+      71%  { border-color: #4b0082; box-shadow: 0 0 5px #4b0082; }
+      85%  { border-color: #9400d3; box-shadow: 0 0 5px #9400d3; }
+      100% { border-color: #ff0000; box-shadow: 0 0 5px #ff0000; }
+    }
+    
+    /* Base Styles */
+    .marquee {
+      white-space: nowrap;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+    .marquee span {
+      display: inline-block;
+      padding-left: 100%;
+      animation: marquee 15s linear infinite;
+    }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .status-pns { background-color: #3B82F6; color: white; }
+    .status-pppk { background-color: #10B981; color: white; }
+    .status-honor { background-color: #F59E0B; color: white; }
+    
+    /* Interactive Elements */
+    .interactive-element {
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .interactive-element:hover {
+      animation: rainbowBorder 3s linear infinite;
+      background-color: white !important;
+      color: black !important;
+    }
+    
+    .nav-link {
+      position: relative;
+      padding: 0.5rem 0;
+      transition: all 0.3s ease;
+    }
+    
+    .nav-link:hover {
+      background-color: white;
+      color: black;
+      animation: rainbowBorder 3s linear infinite;
+    }
+    
+    .nav-link:hover::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, 
+        red, orange, yellow, green, blue, indigo, violet);
+      animation: rainbowBorder 3s linear infinite;
+    }
+    
+    /* Button Styles */
+    .logout-btn {
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .logout-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      animation: rainbowBorder 3s linear infinite;
+      background-color: white !important;
+      color: black !important;
+    }
+    .logout-btn:active {
+      transform: translateY(0);
+    }
+    .logout-btn i {
+      transition: transform 0.3s ease;
+    }
+    .logout-btn:hover i {
+      transform: translateX(3px);
+    }
+    
+    /* Card Styles */
+    .stat-card:hover {
+      animation: rainbowBorder 3s linear infinite;
+      transform: translateY(-3px);
+    }
+    
+    /* Pensiun Styles */
+    .pensiun-soon {
+      background-color: #FEF3C7;
+    }
+    .pensiun-very-soon {
+      background-color: #FECACA;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 font-sans">
+  <div id="app" class="flex h-screen">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="w-64 bg-blue-800 text-white flex flex-col p-4 space-y-4 transition-all duration-300 relative">
+      <img src="logo.png" alt="Logo" class="w-16 h-16 mx-auto mb-2 interactive-element hover:bg-white hover:rounded-lg">
+      <h1 class="text-2xl font-bold mb-6 text-center interactive-element hover:bg-white hover:rounded-lg hover:text-black">Admin Sekolah</h1>
+      <nav class="flex-1 space-y-2">
+        <div class="nav-link interactive-element rounded-lg p-2">
+          <a href="index.html" class="flex items-center gap-2 font-semibold">
+            <i class="fas fa-home w-5 h-5"></i>
+            Beranda
+          </a>
+        </div>
+        <div class="nav-link interactive-element rounded-lg p-2">
+          <button onclick="toggleSubmenu('guruSub')" class="w-full text-left flex items-center justify-between font-semibold">
+            <span class="flex items-center gap-2">
+              <i class="fas fa-chalkboard-teacher w-5 h-5"></i>
+              Guru & Tendik
+            </span>
+            <svg class="w-4 h-4 transform transition-transform" id="icon-guruSub" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <ul id="guruSub" class="ml-4 space-y-1 hidden">
+            <li class="nav-link interactive-element rounded-lg p-2"><a href="guru.html" class="block py-1">Data Guru</a></li>
+            <li class="nav-link interactive-element rounded-lg p-2"><a href="tendik.html" class="block py-1">Data Tendik</a></li>
+          </ul>
+        </div>
+        <div class="nav-link interactive-element rounded-lg p-2">
+          <button onclick="toggleSubmenu('siswaSub')" class="w-full text-left flex items-center justify-between font-semibold">
+            <span class="flex items-center gap-2">
+              <i class="fas fa-user-graduate w-5 h-5"></i>
+              Siswa
+            </span>
+            <svg class="w-4 h-4 transform transition-transform" id="icon-siswaSub" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <ul id="siswaSub" class="ml-4 space-y-1 hidden">
+            <li class="nav-link interactive-element rounded-lg p-2"><a href="kelas7.html" class="block py-1">Kelas 7</a></li>
+            <li class="nav-link interactive-element rounded-lg p-2"><a href="kelas8.html" class="block py-1">Kelas 8</a></li>
+            <li class="nav-link interactive-element rounded-lg p-2"><a href="kelas9.html" class="block py-1">Kelas 9</a></li>
+          </ul>
+        </div>
+        <div class="nav-link interactive-element rounded-lg p-2">
+          <a href="rombel.html" class="flex items-center gap-2 font-semibold">
+            <i class="fas fa-users w-5 h-5"></i>
+            Rombongan Belajar
+          </a>
+        </div>
+        <div class="nav-link interactive-element rounded-lg p-2">
+          <a href="profil.html" class="flex items-center gap-2 font-semibold">
+            <i class="fas fa-school w-5 h-5"></i>
+            Profil Sekolah
+          </a>
+        </div>
+        <div class="nav-link interactive-element rounded-lg p-2">
+          <a href="informasi.html" class="flex items-center gap-2 font-semibold">
+            <i class="fas fa-info-circle w-5 h-5"></i>
+            Informasi
+          </a>
+        </div>
+        <div class="nav-link interactive-element rounded-lg p-2">
+          <a href="pengaturan.html" class="flex items-center gap-2 font-semibold">
+            <i class="fas fa-cog w-5 h-5"></i>
+            Pengaturan
+          </a>
+        </div>
+        
+        <!-- Tombol Logout -->
+        <div class="mt-6">
+          <button onclick="confirmLogout()" 
+                  class="logout-btn bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg flex items-center justify-center gap-2 w-full interactive-element">
+            <i class="fas fa-sign-out-alt w-4 h-4"></i>
+            <span class="font-medium">Keluar Sistem</span>
+          </button>
+        </div>
+      </nav>
+      <footer class="text-xs text-center py-2 w-full absolute bottom-0 left-0 text-white/50 interactive-element hover:bg-white hover:rounded-lg hover:text-black">
+        <div class="w-full text-center">&copy; 2025 Hak Cipta Admin Sekolah</div>
+      </footer>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col">
+      <!-- Navbar -->
+      <header class="flex items-center justify-between bg-white px-4 py-2 shadow">
+        <div class="flex items-center gap-2">
+          <button onclick="toggleSidebar()" class="text-blue-800 focus:outline-none interactive-element hover:bg-gray-100 p-2 rounded-lg">
+            <i class="fas fa-bars text-xl"></i>
+          </button>
+          <img src="logo.png" alt="Logo Sekolah" class="w-8 h-8 interactive-element hover:bg-gray-100 rounded-lg">
+          <span class="text-lg font-bold text-blue-800 interactive-element hover:bg-gray-100 p-2 rounded-lg">Dashboard Sekolah</span>
+        </div>
+        <div class="flex items-center gap-4">
+          <div id="jamDigital" class="text-blue-800 text-xl font-bold interactive-element hover:bg-gray-100 p-2 rounded-lg"></div>
+          <a href="pesan.html" class="relative interactive-element hover:bg-gray-100 p-2 rounded-lg">
+            <i class="fas fa-bell text-xl text-blue-800"></i>
+            <span class="absolute top-0 right-0 inline-block w-2 h-2 bg-red-600 rounded-full"></span>
+          </a>
+        </div>
+      </header>
+
+      <!-- Running Text -->
+      <div class="bg-blue-100 text-blue-800 text-sm px-4 py-1 marquee interactive-element hover:bg-white hover:text-black">
+        <span id="runningText">Memuat data sekolah...</span>
+      </div>
+
+      <!-- Informasi Utama -->
+      <main class="flex-1 p-6 overflow-auto space-y-6">
+        <!-- Stat Cards -->
+        <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <!-- Card Guru -->
+          <div class="stat-card bg-white p-4 rounded-xl shadow flex items-center interactive-element">
+            <div class="bg-blue-100 p-3 rounded-lg mr-4 flex-shrink-0">
+              <i class="fas fa-chalkboard-teacher text-2xl text-blue-600"></i>
+            </div>
+            <div>
+              <h3 class="text-sm font-medium text-gray-500 mb-1">Jumlah Guru</h3>
+              <p class="text-2xl font-bold text-gray-800" id="teacherCount">0</p>
+            </div>
+          </div>
+
+          <!-- Card Tendik -->
+          <div class="stat-card bg-white p-4 rounded-xl shadow flex items-center interactive-element">
+            <div class="bg-green-100 p-3 rounded-lg mr-4 flex-shrink-0">
+              <i class="fas fa-user-tie text-2xl text-green-600"></i>
+            </div>
+            <div>
+              <h3 class="text-sm font-medium text-gray-500 mb-1">Jumlah Tendik</h3>
+              <p class="text-2xl font-bold text-gray-800" id="staffCount">0</p>
+            </div>
+          </div>
+
+          <!-- Card Siswa -->
+          <div class="stat-card bg-white p-4 rounded-xl shadow flex items-center interactive-element">
+            <div class="bg-purple-100 p-3 rounded-lg mr-4 flex-shrink-0">
+              <i class="fas fa-user-graduate text-2xl text-purple-600"></i>
+            </div>
+            <div>
+              <h3 class="text-sm font-medium text-gray-500 mb-1">Jumlah Siswa</h3>
+              <p class="text-2xl font-bold text-gray-800" id="studentCount">0</p>
+            </div>
+          </div>
+
+          <!-- Card Rombel -->
+          <div class="stat-card bg-white p-4 rounded-xl shadow flex items-center interactive-element">
+            <div class="bg-orange-100 p-3 rounded-lg mr-4 flex-shrink-0">
+              <i class="fas fa-users text-2xl text-orange-600"></i>
+            </div>
+            <div>
+              <h3 class="text-sm font-medium text-gray-500 mb-1">Jumlah Rombel</h3>
+              <p class="text-2xl font-bold text-gray-800" id="classCount">0</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Charts & Tabel Informasi -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div class="bg-white p-3 rounded-xl shadow interactive-element hover:bg-gray-50">
+            <h3 class="text-sm font-semibold mb-2 text-blue-700">Status Pegawai</h3>
+            <canvas id="chartPegawai" height="300"></canvas>
+          </div>
+          <div class="bg-white p-3 rounded-xl shadow interactive-element hover:bg-gray-50">
+            <h3 class="text-sm font-semibold mb-2 text-blue-700">Jumlah Siswa Laki-laki & Perempuan</h3>
+            <canvas id="chartSiswa" height="200"></canvas>
+          </div>
+          <div class="bg-white p-3 rounded-xl shadow interactive-element hover:bg-gray-50">
+            <h3 class="text-sm font-semibold mb-4 text-blue-700">Informasi Terbaru</h3>
+            <div class="overflow-y-auto max-h-64">
+              <table class="w-full table-auto text-left">
+                <thead>
+                  <tr>
+                    <th class="border px-2 py-1 interactive-element hover:bg-gray-100">Tanggal</th>
+                    <th class="border px-2 py-1 interactive-element hover:bg-gray-100">Informasi</th>
+                    <th class="border px-2 py-1 interactive-element hover:bg-gray-100">Pemberi</th>
+                  </tr>
+                </thead>
+                <tbody id="infoTableBody">
+                  <tr>
+                    <td colspan="3" class="text-center py-4">Memuat informasi...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Tabel Guru dan Tendik Mendekati Pensiun -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <!-- Card Guru Mendekati Pensiun -->
+          <div class="bg-white p-3 rounded-xl shadow interactive-element hover:bg-gray-50">
+            <h3 class="text-sm font-semibold mb-4 text-blue-700 flex items-center gap-2">
+              <i class="fas fa-chalkboard-teacher text-blue-600"></i>
+              Guru Mendekati Pensiun (5 Tahun Lagi)
+            </h3>
+            <div class="overflow-y-auto max-h-64">
+              <table class="w-full table-auto text-left">
+                <thead>
+                  <tr>
+                    <th class="border px-2 py-1 interactive-element hover:bg-gray-100">Nama Guru</th>
+                    <th class="border px-2 py-1 interactive-element hover:bg-gray-100">Tanggal Pensiun</th>
+                    <th class="border px-2 py-1 interactive-element hover:bg-gray-100">Sisa Waktu</th>
+                  </tr>
+                </thead>
+                <tbody id="guruPensiunTableBody">
+                  <tr>
+                    <td colspan="3" class="text-center py-4">Memuat data guru...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Card Tendik Mendekati Pensiun -->
+          <div class="bg-white p-3 rounded-xl shadow interactive-element hover:bg-gray-50">
+            <h3 class="text-sm font-semibold mb-4 text-blue-700 flex items-center gap-2">
+              <i class="fas fa-user-tie text-green-600"></i>
+              Tendik Mendekati Pensiun (5 Tahun Lagi)
+            </h3>
+            <div class="overflow-y-auto max-h-64">
+              <table class="w-full table-auto text-left">
+                <thead>
+                  <tr>
+                    <th class="border px-2 py-1 interactive-element hover:bg-gray-100">Nama Tendik</th>
+                    <th class="border px-2 py-1 interactive-element hover:bg-gray-100">Tanggal Pensiun</th>
+                    <th class="border px-2 py-1 interactive-element hover:bg-gray-100">Sisa Waktu</th>
+                  </tr>
+                </thead>
+                <tbody id="tendikPensiunTableBody">
+                  <tr>
+                    <td colspan="3" class="text-center py-4">Memuat data tendik...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    // Inisialisasi halaman
+    document.addEventListener('DOMContentLoaded', function() {
+      // Buat data contoh jika localStorage kosong
+      initializeSampleData();
+      
+      updateDashboardData();
+      updateJamDigital();
+      setInterval(updateDashboardData, 5000); // Update setiap 5 detik
+    });
+
+    // Global chart variables
+    let employeeChart, studentChart;
+
+    // Fungsi untuk inisialisasi data contoh
+    function initializeSampleData() {
+      // Data guru contoh
+      if (!localStorage.getItem('teachers')) {
+        const sampleTeachers = [
+          {
+            id: 1,
+            name: "Dr. Ahmad Budiman, M.Pd",
+            nip: "197003151992031001",
+            birthPlace: "Jakarta",
+            birthDate: "1970-03-15",
+            position: "Guru Matematika",
+            rank: "Pembina Tingkat I",
+            group: "IV/b",
+            tmt: "1992-03-01",
+            status: "PNS",
+            pensionAge: 60,
+            pensionDate: "15/03/2025", // Akan pensiun tahun depan
+            gender: "Laki-laki",
+            photo: "https://randomuser.me/api/portraits/men/1.jpg"
+          },
+          {
+            id: 2,
+            name: "Dra. Siti Aminah, M.Pd",
+            nip: "197512102000122001",
+            birthPlace: "Bandung",
+            birthDate: "1975-12-10",
+            position: "Guru Bahasa Indonesia",
+            rank: "Pembina",
+            group: "IV/a",
+            tmt: "2000-12-01",
+            status: "PNS",
+            pensionAge: 60,
+            pensionDate: "10/12/2030", // Masih lama
+            gender: "Perempuan",
+            photo: "https://randomuser.me/api/portraits/women/1.jpg"
+          }
+        ];
+        localStorage.setItem('teachers', JSON.stringify(sampleTeachers));
+        localStorage.setItem('teacherCount', sampleTeachers.length);
+        
+        // Hitung status guru
+        const teacherStatusData = {
+          PNS: sampleTeachers.filter(t => t.status === 'PNS').length,
+          PPPK: sampleTeachers.filter(t => t.status === 'PPPK').length,
+          'Honor Sekolah': sampleTeachers.filter(t => t.status === 'Honor Sekolah').length
+        };
+        localStorage.setItem('teacherStatusData', JSON.stringify(teacherStatusData));
+      }
+
+      // Data tendik contoh
+      if (!localStorage.getItem('staffs')) {
+        const sampleStaffs = [
+          {
+            id: 1,
+            name: "Dewi Lestari, S.Pd",
+            nip: "197803152000122001",
+            birthPlace: "Surabaya",
+            birthDate: "1978-03-15",
+            position: "Tata Usaha",
+            rank: "Penata Tk.I",
+            group: "III/d",
+            tmt: "2000-12-01",
+            status: "PNS",
+            pensionAge: 58,
+            pensionDate: "15/03/2026", // Akan pensiun dalam 2 tahun
+            gender: "Perempuan",
+            photo: "https://randomuser.me/api/portraits/women/2.jpg"
+          },
+          {
+            id: 2,
+            name: "Bambang Sutrisno",
+            nip: "198004102005011003",
+            birthPlace: "Yogyakarta",
+            birthDate: "1980-04-10",
+            position: "Laboran",
+            rank: "Penata Muda Tk.I",
+            group: "III/b",
+            tmt: "2005-01-10",
+            status: "PPPK",
+            pensionAge: 58,
+            pensionDate: "10/04/2038", // Masih lama
+            gender: "Laki-laki",
+            photo: "https://randomuser.me/api/portraits/men/3.jpg"
+          }
+        ];
+        localStorage.setItem('staffs', JSON.stringify(sampleStaffs));
+        localStorage.setItem('staffCount', sampleStaffs.length);
+        
+        // Hitung status tendik
+        const staffStatusData = {
+          PNS: sampleStaffs.filter(s => s.status === 'PNS').length,
+          PPPK: sampleStaffs.filter(s => s.status === 'PPPK').length,
+          'Honor Sekolah': sampleStaffs.filter(s => s.status === 'Honor Sekolah').length
+        };
+        localStorage.setItem('staffStatusData', JSON.stringify(staffStatusData));
+      }
+
+      // Data contoh lainnya
+      if (!localStorage.getItem('studentCount')) {
+        localStorage.setItem('studentCount', '350');
+        localStorage.setItem('classCount', '12');
+        localStorage.setItem('studentGenderData', JSON.stringify({ Laki: 180, Perempuan: 170 }));
+        
+        const sampleInfo = [
+          {
+            date: '12/05/2023',
+            message: 'Rapat dewan guru bulanan',
+            sender: 'Kepala Sekolah'
+          },
+          {
+            date: '10/05/2023',
+            message: 'Pembagian rapor semester genap',
+            sender: 'Wakil Kurikulum'
+          }
+        ];
+        localStorage.setItem('latestInfo', JSON.stringify(sampleInfo));
+      }
+    }
+
+    // Update semua data dashboard
+    function updateDashboardData() {
+      // Ambil data dari localStorage
+      const teachers = JSON.parse(localStorage.getItem('teachers')) || [];
+      const staffs = JSON.parse(localStorage.getItem('staffs')) || [];
+      const teacherStatusData = JSON.parse(localStorage.getItem('teacherStatusData')) || { PNS: 0, PPPK: 0, 'Honor Sekolah': 0 };
+      const staffStatusData = JSON.parse(localStorage.getItem('staffStatusData')) || { PNS: 0, PPPK: 0, 'Honor Sekolah': 0 };
+      const studentData = JSON.parse(localStorage.getItem('studentGenderData')) || { Laki: 0, Perempuan: 0 };
+      const infoData = JSON.parse(localStorage.getItem('latestInfo')) || [];
+      
+      // Gabungkan data guru dan tendik untuk chart pegawai
+      const combinedEmployeeData = {
+        PNS: (teacherStatusData.PNS || 0) + (staffStatusData.PNS || 0),
+        PPPK: (teacherStatusData.PPPK || 0) + (staffStatusData.PPPK || 0),
+        'Honor Sekolah': (teacherStatusData['Honor Sekolah'] || 0) + (staffStatusData['Honor Sekolah'] || 0)
+      };
+      
+      // Update jumlah di card
+      document.getElementById('teacherCount').textContent = localStorage.getItem('teacherCount') || 0;
+      document.getElementById('staffCount').textContent = localStorage.getItem('staffCount') || 0;
+      document.getElementById('studentCount').textContent = localStorage.getItem('studentCount') || 0;
+      document.getElementById('classCount').textContent = localStorage.getItem('classCount') || 0;
+      
+      // Update running text
+      const runningTexts = [
+        "Selamat datang di Sistem Informasi Sekolah",
+        `Total guru: ${localStorage.getItem('teacherCount') || 0} orang | Total tendik: ${localStorage.getItem('staffCount') || 0} orang`,
+        `Total siswa: ${localStorage.getItem('studentCount') || 0} orang | Total rombel: ${localStorage.getItem('classCount') || 0} kelas`,
+        "Silakan gunakan menu untuk mengakses data"
+      ];
+      document.getElementById('runningText').textContent = runningTexts[Math.floor(Math.random() * runningTexts.length)];
+      
+      // Update atau buat chart
+      updateCharts(combinedEmployeeData, studentData);
+      
+      // Update tabel informasi
+      updateInfoTable(infoData);
+      
+      // Update tabel guru dan tendik yang mendekati pensiun
+      updatePensiunTables(teachers, staffs);
+    }
+
+    // Update atau buat chart
+    function updateCharts(employeeData, studentData) {
+      const ctxPegawai = document.getElementById('chartPegawai').getContext('2d');
+      const ctxSiswa = document.getElementById('chartSiswa').getContext('2d');
+      
+      // Chart Status Pegawai (Gabungan Guru + Tendik)
+      if (employeeChart) {
+        employeeChart.data.datasets[0].data = [
+          employeeData.PNS || 0,
+          employeeData.PPPK || 0,
+          employeeData['Honor Sekolah'] || 0
+        ];
+        employeeChart.update();
+      } else {
+        employeeChart = new Chart(ctxPegawai, {
+          type: 'bar',
+          data: {
+            labels: ['PNS', 'PPPK', 'Honor Sekolah'],
+            datasets: [{
+              label: 'Jumlah Pegawai',
+              data: [
+                employeeData.PNS || 0,
+                employeeData.PPPK || 0,
+                employeeData['Honor Sekolah'] || 0
+              ],
+              backgroundColor: ['#3B82F6', '#10B981', '#F59E0B'],
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  stepSize: 1
+                }
+              }
+            }
+          }
+        });
+      }
+      
+      // Chart Jenis Kelamin Siswa
+      if (studentChart) {
+        studentChart.data.datasets[0].data = [
+          studentData.Laki || 0,
+          studentData.Perempuan || 0
+        ];
+        studentChart.update();
+      } else {
+        studentChart = new Chart(ctxSiswa, {
+          type: 'pie',
+          data: {
+            labels: ['Laki-laki', 'Perempuan'],
+            datasets: [{
+              label: 'Jumlah Siswa',
+              data: [
+                studentData.Laki || 0,
+                studentData.Perempuan || 0
+              ],
+              backgroundColor: ['#60A5FA', '#F472B6'],
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true
+          }
+        });
+      }
+    }
+
+    // Update tabel informasi
+    function updateInfoTable(infoData) {
+      const tableBody = document.getElementById('infoTableBody');
+      
+      if (!infoData || infoData.length === 0) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="3" class="text-center py-4">Tidak ada informasi terbaru</td>
+          </tr>
+        `;
+        return;
+      }
+      
+      // Urutkan berdasarkan tanggal (terbaru pertama)
+      infoData.sort((a, b) => {
+        const dateA = new Date(a.date.split('/').reverse().join('-'));
+        const dateB = new Date(b.date.split('/').reverse().join('-'));
+        return dateB - dateA;
+      });
+      
+      // Tampilkan maksimal 5 informasi terbaru
+      const displayData = infoData.slice(0, 5);
+      
+      tableBody.innerHTML = displayData.map(info => `
+        <tr>
+          <td class="border px-2 py-1 interactive-element hover:bg-gray-100">${info.date}</td>
+          <td class="border px-2 py-1 interactive-element hover:bg-gray-100">${info.message}</td>
+          <td class="border px-2 py-1 interactive-element hover:bg-gray-100">${info.sender}</td>
+        </tr>
+      `).join('');
+    }
+
+    // Update tabel guru dan tendik yang mendekati pensiun
+    function updatePensiunTables(teachers, staffs) {
+      const hariIni = new Date();
+      const limaTahunLagi = new Date();
+      limaTahunLagi.setFullYear(hariIni.getFullYear() + 5);
+
+      // Format tanggal ke YYYY-MM-DD untuk perbandingan
+      const formatTanggal = (dateStr) => {
+        if (!dateStr || dateStr === '-') return null;
+        const parts = dateStr.split('/');
+        if (parts.length === 3) {
+          return `${parts[2]}-${parts[1]}-${parts[0]}`; // Konversi DD/MM/YYYY ke YYYY-MM-DD
+        }
+        return dateStr; // Sudah dalam format YYYY-MM-DD
+      };
+
+      // Filter guru yang mendekati pensiun (dalam 5 tahun)
+      const guruMendekatiPensiun = teachers.filter(guru => {
+        const formattedDate = formatTanggal(guru.pensionDate);
+        if (!formattedDate) return false;
+        
+        const tanggalPensiun = new Date(formattedDate);
+        return tanggalPensiun <= limaTahunLagi && tanggalPensiun >= hariIni;
+      }).sort((a, b) => {
+        const dateA = new Date(formatTanggal(a.pensionDate));
+        const dateB = new Date(formatTanggal(b.pensionDate));
+        return dateA - dateB;
+      });
+
+      // Filter tendik yang mendekati pensiun (dalam 5 tahun)
+      const tendikMendekatiPensiun = staffs.filter(tendik => {
+        const formattedDate = formatTanggal(tendik.pensionDate);
+        if (!formattedDate) return false;
+        
+        const tanggalPensiun = new Date(formattedDate);
+        return tanggalPensiun <= limaTahunLagi && tanggalPensiun >= hariIni;
+      }).sort((a, b) => {
+        const dateA = new Date(formatTanggal(a.pensionDate));
+        const dateB = new Date(formatTanggal(b.pensionDate));
+        return dateA - dateB;
+      });
+
+      // Update tabel guru
+      const guruTableBody = document.getElementById('guruPensiunTableBody');
+      if (guruMendekatiPensiun.length === 0) {
+        guruTableBody.innerHTML = `
+          <tr>
+            <td colspan="3" class="text-center py-4">Tidak ada guru yang mendekati pensiun dalam 5 tahun</td>
+          </tr>
+        `;
+      } else {
+        guruTableBody.innerHTML = guruMendekatiPensiun.map(guru => {
+          const formattedDate = formatTanggal(guru.pensionDate);
+          const tanggalPensiun = new Date(formattedDate);
+          const selisihWaktu = tanggalPensiun - hariIni;
+          const selisihHari = Math.ceil(selisihWaktu / (1000 * 60 * 60 * 24));
+          const selisihTahun = Math.floor(selisihHari / 365);
+          const selisihBulan = Math.floor((selisihHari % 365) / 30);
+          
+          // Tentukan warna baris berdasarkan waktu pensiun
+          let rowClass = '';
+          if (selisihHari <= 365) { // Kurang dari 1 tahun
+            rowClass = 'pensiun-very-soon';
+          } else if (selisihHari <= 1825) { // Kurang dari 5 tahun
+            rowClass = 'pensiun-soon';
+          }
+          
+          // Format tampilan tanggal sebagai DD/MM/YYYY
+          const tampilanTanggal = formattedDate.split('-').reverse().join('/');
+          
+          return `
+            <tr class="${rowClass}">
+              <td class="border px-2 py-1">${guru.name}</td>
+              <td class="border px-2 py-1">${tampilanTanggal}</td>
+              <td class="border px-2 py-1">${selisihTahun > 0 ? selisihTahun + ' tahun ' : ''}${selisihBulan} bulan</td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      // Update tabel tendik
+      const tendikTableBody = document.getElementById('tendikPensiunTableBody');
+      if (tendikMendekatiPensiun.length === 0) {
+        tendikTableBody.innerHTML = `
+          <tr>
+            <td colspan="3" class="text-center py-4">Tidak ada tendik yang mendekati pensiun dalam 5 tahun</td>
+          </tr>
+        `;
+      } else {
+        tendikTableBody.innerHTML = tendikMendekatiPensiun.map(tendik => {
+          const formattedDate = formatTanggal(tendik.pensionDate);
+          const tanggalPensiun = new Date(formattedDate);
+          const selisihWaktu = tanggalPensiun - hariIni;
+          const selisihHari = Math.ceil(selisihWaktu / (1000 * 60 * 60 * 24));
+          const selisihTahun = Math.floor(selisihHari / 365);
+          const selisihBulan = Math.floor((selisihHari % 365) / 30);
+          
+          // Tentukan warna baris berdasarkan waktu pensiun
+          let rowClass = '';
+          if (selisihHari <= 365) { // Kurang dari 1 tahun
+            rowClass = 'pensiun-very-soon';
+          } else if (selisihHari <= 1825) { // Kurang dari 5 tahun
+            rowClass = 'pensiun-soon';
+          }
+          
+          // Format tampilan tanggal sebagai DD/MM/YYYY
+          const tampilanTanggal = formattedDate.split('-').reverse().join('/');
+          
+          return `
+            <tr class="${rowClass}">
+              <td class="border px-2 py-1">${tendik.name}</td>
+              <td class="border px-2 py-1">${tampilanTanggal}</td>
+              <td class="border px-2 py-1">${selisihTahun > 0 ? selisihTahun + ' tahun ' : ''}${selisihBulan} bulan</td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+
+    // Toggle sidebar
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('w-64');
+      sidebar.classList.toggle('w-0');
+      sidebar.classList.toggle('hidden');
+    }
+
+    // Toggle submenu
+    function toggleSubmenu(id) {
+      const submenu = document.getElementById(id);
+      const icon = document.getElementById('icon-' + id);
+      submenu.classList.toggle('hidden');
+      icon.classList.toggle('rotate-180');
+    }
+
+    // Jam digital
+    function updateJamDigital() {
+      const jam = document.getElementById("jamDigital");
+      const sekarang = new Date();
+      const options = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
+      jam.textContent = sekarang.toLocaleTimeString('id-ID', options);
+    }
+    setInterval(updateJamDigital, 1000);
+
+    // Listen for storage changes
+    window.addEventListener('storage', function(event) {
+      if ([
+        'teacherCount', 'teacherStatusData', 'teachers',
+        'staffCount', 'staffStatusData', 'staffs',
+        'studentCount', 'studentGenderData', 
+        'classCount', 'latestInfo'
+      ].includes(event.key)) {
+        updateDashboardData();
+      }
+    });
+
+    // =============================================
+    // FUNGSI LOGOUT
+    // =============================================
+    function confirmLogout() {
+      Swal.fire({
+        title: 'Konfirmasi Keluar',
+        html: '<div class="text-lg font-medium">Anda yakin ingin keluar dari sistem?</div>',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: '<i class="fas fa-sign-out-alt mr-2"></i> Ya, Keluar',
+        cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        background: 'white',
+        backdrop: `
+          rgba(0,0,0,0.4)
+          url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z'/%3E%3Cpath d='M13 2v7h7'/%3E%3C/svg%3E")
+          center top
+          no-repeat
+        `,
+        showClass: {
+          popup: 'animate__animated animate__fadeInDown'
+        },
+        hideClass: {
+          popup: 'animate__animated animate__fadeOutUp'
+        }
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Tampilkan loading
+          Swal.fire({
+            title: 'Sedang memproses...',
+            html: 'Membersihkan sesi dan mengarahkan ke halaman login',
+            timer: 1500,
+            timerProgressBar: true,
+            didOpen: () => {
+              Swal.showLoading();
+            },
+            willClose: () => {
+              // Bersihkan localStorage
+              localStorage.removeItem('userToken');
+              localStorage.removeItem('userData');
+              // Redirect ke halaman login
+              window.location.href = 'https://nusatjasi.github.io/logindapo2/';
+            }
+          });
+        }
+      });
+    }
+  </script>
+</body>
+</html>

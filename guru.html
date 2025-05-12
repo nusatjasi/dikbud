@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Guru - Admin Sekolah</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Animations */
+    @keyframes rainbowBorder {
+      0%   { border-color: #ff0000; box-shadow: 0 0 5px #ff0000; }
+      14%  { border-color: #ff7f00; box-shadow: 0 0 5px #ff7f00; }
+      28%  { border-color: #ffff00; box-shadow: 0 0 5px #ffff00; }
+      42%  { border-color: #00ff00; box-shadow: 0 0 5px #00ff00; }
+      57%  { border-color: #0000ff; box-shadow: 0 0 5px #0000ff; }
+      71%  { border-color: #4b0082; box-shadow: 0 0 5px #4b0082; }
+      85%  { border-color: #9400d3; box-shadow: 0 0 5px #9400d3; }
+      100% { border-color: #ff0000; box-shadow: 0 0 5px #ff0000; }
+    }
+
+    .marquee {
+      white-space: nowrap;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+    .marquee span {
+      display: inline-block;
+      padding-left: 100%;
+      animation: marquee 15s linear infinite;
+    }
+    @keyframes marquee {
+      0%   { transform: translate(0, 0); }
+      100% { transform: translate(-100%, 0); }
+    }
+    .teacher-photo {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .status-pns { background-color: #3B82F6; color: white; }
+    .status-pppk { background-color: #10B981; color: white; }
+    .status-honor { background-color: #F59E0B; color: white; }
+    
+    /* Sidebar Styles */
+    .nav-link {
+      position: relative;
+      padding: 0.75rem 1rem;
+      transition: all 0.3s ease;
+      border-radius: 0.5rem;
+      margin-bottom: 0.25rem;
+    }
+    
+    .nav-link:hover {
+      background-color: white;
+      color: black;
+      animation: rainbowBorder 3s linear infinite;
+    }
+    
+    .nav-link:hover::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, 
+        red, orange, yellow, green, blue, indigo, violet);
+      animation: rainbowBorder 3s linear infinite;
+    }
+    
+    .logout-btn {
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .logout-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      animation: rainbowBorder 3s linear infinite;
+      background-color: white !important;
+      color: black !important;
+    }
+    
+    /* Pensiun Styles */
+    .pensiun-soon {
+      background-color: #FEF3C7;
+    }
+    .pensiun-very-soon {
+      background-color: #FECACA;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 font-sans">
+  <div id="app" class="flex h-screen">
+    <!-- Sidebar - Consistent with index.html -->
+    <aside id="sidebar" class="w-64 bg-blue-800 text-white flex flex-col p-4 space-y-2 relative">
+      <img src="logo.png" alt="Logo" class="w-16 h-16 mx-auto mb-2">
+      <h1 class="text-2xl font-bold mb-6 text-center">Admin Sekolah</h1>
+      <nav class="flex-1 space-y-2">
+        <div class="nav-link">
+          <a href="index.html" class="flex items-center gap-2 font-semibold">
+            <i class="fas fa-home w-5 h-5"></i>
+            Beranda
+          </a>
+        </div>
+        <div>
+          <button onclick="toggleSubmenu('guruSub')" class="nav-link w-full text-left flex items-center justify-between">
+            <span class="flex items-center gap-2">
+              <i class="fas fa-chalkboard-teacher w-5 h-5"></i>
+              Guru & Tendik
+            </span>
+            <svg class="w-4 h-4 transform transition-transform" id="icon-guruSub" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <ul id="guruSub" class="ml-4 space-y-1 hidden">
+            <li class="nav-link"><a href="guru.html" class="block py-1 font-bold">Data Guru</a></li>
+            <li class="nav-link"><a href="tendik.html" class="block py-1">Data Tendik</a></li>
+          </ul>
+        </div>
+        <div>
+          <button onclick="toggleSubmenu('siswaSub')" class="nav-link w-full text-left flex items-center justify-between">
+            <span class="flex items-center gap-2">
+              <i class="fas fa-user-graduate w-5 h-5"></i>
+              Siswa
+            </span>
+            <svg class="w-4 h-4 transform transition-transform" id="icon-siswaSub" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <ul id="siswaSub" class="ml-4 space-y-1 hidden">
+            <li class="nav-link"><a href="kelas7.html" class="block py-1">Kelas 7</a></li>
+            <li class="nav-link"><a href="kelas8.html" class="block py-1">Kelas 8</a></li>
+            <li class="nav-link"><a href="kelas9.html" class="block py-1">Kelas 9</a></li>
+          </ul>
+        </div>
+        <div class="nav-link">
+          <a href="rombel.html" class="flex items-center gap-2 font-semibold">
+            <i class="fas fa-users w-5 h-5"></i>
+            Rombongan Belajar
+          </a>
+        </div>
+        <div class="nav-link">
+          <a href="profil.html" class="flex items-center gap-2 font-semibold">
+            <i class="fas fa-school w-5 h-5"></i>
+            Profil Sekolah
+          </a>
+        </div>
+        <div class="nav-link">
+          <a href="informasi.html" class="flex items-center gap-2 font-semibold">
+            <i class="fas fa-info-circle w-5 h-5"></i>
+            Informasi
+          </a>
+        </div>
+        <div class="nav-link">
+          <a href="pengaturan.html" class="flex items-center gap-2 font-semibold">
+            <i class="fas fa-cog w-5 h-5"></i>
+            Pengaturan
+          </a>
+        </div>
+        
+        <!-- Tombol Logout -->
+        <div class="mt-6">
+          <button onclick="confirmLogout()" 
+                  class="logout-btn bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg flex items-center justify-center gap-2 w-full">
+            <i class="fas fa-sign-out-alt w-4 h-4"></i>
+            <span class="font-medium">Keluar Sistem</span>
+          </button>
+        </div>
+      </nav>
+      <footer class="text-xs text-center py-2 w-full absolute bottom-0 left-0 text-white/50">
+        <div class="w-full text-center">&copy; 2025 Hak Cipta Admin Sekolah</div>
+      </footer>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+      <!-- Navbar -->
+      <header class="flex items-center justify-between bg-white px-4 py-2 shadow">
+        <div class="flex items-center gap-2">
+          <button onclick="toggleSidebarMobile()" class="text-blue-800 focus:outline-none md:hidden">
+            <i class="fas fa-bars text-xl"></i>
+          </button>
+          <img src="logo.png" alt="Logo Sekolah" class="w-8 h-8">
+          <span class="text-lg font-bold text-blue-800">Data Guru</span>
+        </div>
+        <div class="flex items-center gap-4">
+          <div id="jamDigital" class="text-blue-800 text-xl font-bold"></div>
+          <a href="link-pesan.html" class="relative">
+            <i class="fas fa-bell text-xl text-blue-800"></i>
+            <span class="absolute top-0 right-0 inline-block w-2 h-2 bg-red-600 rounded-full"></span>
+          </a>
+        </div>
+      </header>
+
+      <!-- Running Text -->
+      <div class="bg-blue-100 text-blue-800 text-sm px-4 py-1 marquee">
+        <span>Manajemen Data Guru - Silakan tambah, edit, atau hapus data guru sesuai kebutuhan</span>
+      </div>
+
+      <!-- Main Content -->
+      <main class="flex-1 p-6 overflow-auto space-y-6">
+        <!-- Action Buttons -->
+        <div class="flex justify-between items-center">
+          <div class="flex items-center gap-2">
+            <button onclick="showAddModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center gap-2">
+              <i class="fas fa-plus"></i> Tambah Guru
+            </button>
+            <button onclick="exportToPDF()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded flex items-center gap-2">
+              <i class="fas fa-file-pdf"></i> Download PDF
+            </button>
+            <button onclick="refreshData()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded flex items-center gap-2">
+              <i class="fas fa-sync-alt"></i> Segarkan Data
+            </button>
+          </div>
+          <div class="relative">
+            <input type="text" placeholder="Cari guru..." class="border rounded pl-10 pr-4 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-blue-500" id="searchInput">
+            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+          </div>
+        </div>
+
+        <!-- Teacher Table -->
+        <div class="bg-white rounded-xl shadow overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-blue-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Foto</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Nama</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">NIP</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Pangkat/Gol</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Jabatan</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">TMT</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Status</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Mapel</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Tempat/Tgl Lahir</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Usia Pensiun</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Tgl Pensiun</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Aksi</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200" id="teacherTableBody">
+                <!-- Data will be inserted here by JavaScript -->
+              </tbody>
+            </table>
+          </div>
+          <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+            <div class="flex-1 flex justify-between sm:hidden">
+              <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"> Previous </a>
+              <a href="#" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"> Next </a>
+            </div>
+            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+              <div>
+                <p class="text-sm text-gray-700">
+                  Menampilkan <span class="font-medium">1</span> sampai <span class="font-medium">10</span> dari <span class="font-medium" id="totalTeachers">--</span> guru
+                </p>
+              </div>
+              <div>
+                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                  <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                    <span class="sr-only">Previous</span>
+                    <i class="fas fa-chevron-left"></i>
+                  </a>
+                  <a href="#" aria-current="page" class="z-10 bg-blue-50 border-blue-500 text-blue-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium"> 1 </a>
+                  <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium"> 2 </a>
+                  <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium"> 3 </a>
+                  <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                    <span class="sr-only">Next</span>
+                    <i class="fas fa-chevron-right"></i>
+                  </a>
+                </nav>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Add/Edit Teacher Modal -->
+  <div id="teacherModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-2/3 lg:w-1/2 shadow-lg rounded-md bg-white">
+      <div class="flex justify-between items-center border-b pb-2">
+        <h3 class="text-lg font-semibold text-blue-800" id="modalTitle">Tambah Data Guru</h3>
+        <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <form id="teacherForm" class="mt-4 space-y-4">
+        <input type="hidden" id="teacherId">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label for="name" class="block text-sm font-medium text-gray-700">Nama Lengkap *</label>
+            <input type="text" id="name" name="name" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+          </div>
+          <div>
+            <label for="nip" class="block text-sm font-medium text-gray-700">NIP</label>
+            <input type="text" id="nip" name="nip" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+          </div>
+          <div>
+            <label for="rank" class="block text-sm font-medium text-gray-700">Pangkat *</label>
+            <select id="rank" name="rank" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+              <option value="">Pilih Pangkat</option>
+              <option value="Pembina Utama">Pembina Utama</option>
+              <option value="Pembina Utama Madya">Pembina Utama Madya</option>
+              <option value="Pembina Utama Muda">Pembina Utama Muda</option>
+              <option value="Pembina Tingkat I">Pembina Tingkat I</option>
+              <option value="Pembina">Pembina</option>
+              <option value="Penata Tingkat I">Penata Tingkat I</option>
+              <option value="Penata">Penata</option>
+              <option value="Penata Muda Tingkat I">Penata Muda Tingkat I</option>
+              <option value="Penata Muda">Penata Muda</option>
+            </select>
+          </div>
+          <div>
+            <label for="group" class="block text-sm font-medium text-gray-700">Golongan *</label>
+            <select id="group" name="group" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+              <option value="">Pilih Golongan</option>
+              <option value="IV/e">IV/e</option>
+              <option value="IV/d">IV/d</option>
+              <option value="IV/c">IV/c</option>
+              <option value="IV/b">IV/b</option>
+              <option value="IV/a">IV/a</option>
+              <option value="III/d">III/d</option>
+              <option value="III/c">III/c</option>
+              <option value="III/b">III/b</option>
+              <option value="III/a">III/a</option>
+              <option value="II/d">II/d</option>
+              <option value="II/c">II/c</option>
+              <option value="II/b">II/b</option>
+              <option value="II/a">II/a</option>
+              <option value="I/d">I/d</option>
+              <option value="I/c">I/c</option>
+              <option value="I/b">I/b</option>
+              <option value="I/a">I/a</option>
+            </select>
+          </div>
+          <div>
+            <label for="position" class="block text-sm font-medium text-gray-700">Jabatan *</label>
+            <select id="position" name="position" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+              <option value="">Pilih Jabatan</option>
+              <option value="Guru">Guru</option>
+              <option value="Kepala Sekolah">Kepala Sekolah</option>
+              <option value="Wakil Kepala Sekolah">Wakil Kepala Sekolah</option>
+              <option value="Guru BK">Guru BK</option>
+              <option value="Guru Mapel">Guru Mapel</option>
+              <option value="Guru Wali Kelas">Guru Wali Kelas</option>
+            </select>
+          </div>
+          <div>
+            <label for="tmt" class="block text-sm font-medium text-gray-700">TMT *</label>
+            <input type="date" id="tmt" name="tmt" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+          </div>
+          <div>
+            <label for="status" class="block text-sm font-medium text-gray-700">Status Kepegawaian *</label>
+            <select id="status" name="status" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500" onchange="updateRetirementAge()">
+              <option value="">Pilih Status</option>
+              <option value="PNS">PNS</option>
+              <option value="PPPK">PPPK</option>
+              <option value="Honor Sekolah">Honor Sekolah</option>
+              <option value="Honor Daerah">Honor Daerah</option>
+            </select>
+          </div>
+          <div>
+            <label for="birthPlace" class="block text-sm font-medium text-gray-700">Tempat Lahir *</label>
+            <input type="text" id="birthPlace" name="birthPlace" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+          </div>
+          <div>
+            <label for="birthDate" class="block text-sm font-medium text-gray-700">Tanggal Lahir *</label>
+            <input type="date" id="birthDate" name="birthDate" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500" onchange="calculateRetirementDate()">
+          </div>
+          <div>
+            <label for="retirementAge" class="block text-sm font-medium text-gray-700">Usia Pensiun</label>
+            <select id="retirementAge" name="retirementAge" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500" onchange="calculateRetirementDate()">
+              <option value="58">58 Tahun (PNS)</option>
+              <option value="60">60 Tahun (PPPK)</option>
+              <option value="-">Tidak Ada (Honor)</option>
+            </select>
+          </div>
+          <div>
+            <label for="retirementDate" class="block text-sm font-medium text-gray-700">Tanggal Pensiun</label>
+            <input type="text" id="retirementDate" name="retirementDate" readonly class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-gray-100">
+          </div>
+          <div>
+            <label for="gender" class="block text-sm font-medium text-gray-700">Jenis Kelamin *</label>
+            <select id="gender" name="gender" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+              <option value="">Pilih Jenis Kelamin</option>
+              <option value="Laki-laki">Laki-laki</option>
+              <option value="Perempuan">Perempuan</option>
+            </select>
+          </div>
+          <div>
+            <label for="religion" class="block text-sm font-medium text-gray-700">Agama *</label>
+            <select id="religion" name="religion" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+              <option value="">Pilih Agama</option>
+              <option value="Islam">Islam</option>
+              <option value="Kristen">Kristen</option>
+              <option value="Katolik">Katolik</option>
+              <option value="Hindu">Hindu</option>
+              <option value="Buddha">Buddha</option>
+              <option value="Konghucu">Konghucu</option>
+            </select>
+          </div>
+          <div>
+            <label for="subject" class="block text-sm font-medium text-gray-700">Mata Pelajaran *</label>
+            <select id="subject" name="subject" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+              <option value="">Pilih Mata Pelajaran</option>
+              <option value="Matematika">Matematika</option>
+              <option value="Bahasa Indonesia">Bahasa Indonesia</option>
+              <option value="Bahasa Inggris">Bahasa Inggris</option>
+              <option value="IPA">IPA</option>
+              <option value="IPS">IPS</option>
+              <option value="PKn">PKn</option>
+              <option value="Seni Budaya">Seni Budaya</option>
+              <option value="PJOK">PJOK</option>
+              <option value="Prakarya">Prakarya</option>
+              <option value="Informatika">Informatika</option>
+              <option value="Lainnya">Lainnya</option>
+            </select>
+          </div>
+          <div>
+            <label for="photo" class="block text-sm font-medium text-gray-700">Foto</label>
+            <input type="file" id="photo" name="photo" accept="image/*" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+          </div>
+        </div>
+        <div class="flex justify-end space-x-3 pt-4 border-t">
+          <button type="button" onclick="closeModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded">Batal</button>
+          <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- View Teacher Modal -->
+  <div id="viewModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 lg:w-1/3 shadow-lg rounded-md bg-white">
+      <div class="flex justify-between items-center border-b pb-2">
+        <h3 class="text-lg font-semibold text-blue-800">Detail Guru</h3>
+        <button onclick="closeViewModal()" class="text-gray-500 hover:text-gray-700">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="mt-4 space-y-4">
+        <div class="flex flex-col items-center">
+          <img id="viewPhoto" src="https://via.placeholder.com/150" alt="Teacher Photo" class="teacher-photo w-24 h-24 mb-3">
+          <h4 id="viewName" class="text-xl font-bold text-center"></h4>
+          <p id="viewNip" class="text-gray-600 text-center"></p>
+        </div>
+        <div class="grid grid-cols-2 gap-4 border-t pt-4">
+          <div>
+            <p class="text-sm text-gray-500">Pangkat/Golongan</p>
+            <p id="viewRankGroup" class="font-medium"></p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500">Jabatan</p>
+            <p id="viewPosition" class="font-medium"></p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500">TMT</p>
+            <p id="viewTmt" class="font-medium"></p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500">Status Kepegawaian</p>
+            <p id="viewStatus" class="font-medium"></p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500">Jenis Kelamin</p>
+            <p id="viewGender" class="font-medium"></p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500">Agama</p>
+            <p id="viewReligion" class="font-medium"></p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500">Tempat/Tgl Lahir</p>
+            <p id="viewBirthInfo" class="font-medium"></p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500">Usia Pensiun</p>
+            <p id="viewRetirementAge" class="font-medium"></p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500">Tanggal Pensiun</p>
+            <p id="viewRetirementDate" class="font-medium"></p>
+          </div>
+          <div class="col-span-2">
+            <p class="text-sm text-gray-500">Mata Pelajaran</p>
+            <p id="viewSubject" class="font-medium"></p>
+          </div>
+        </div>
+        <div class="flex justify-end pt-4 border-t">
+          <button onclick="closeViewModal()" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded">Tutup</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Initialize jsPDF
+    const { jsPDF } = window.jspdf;
+    
+    // Load data from localStorage or use sample data
+    let teachers = JSON.parse(localStorage.getItem('teachers')) || [
+      {
+        id: 1,
+        name: "Dr. Ahmad Budiman, M.Pd",
+        nip: "196512101992031001",
+        rank: "Pembina Tingkat I",
+        group: "IV/b",
+        position: "Kepala Sekolah",
+        tmt: "1992-03-01",
+        status: "PNS",
+        gender: "Laki-laki",
+        religion: "Islam",
+        subject: "Matematika",
+        birthPlace: "Jakarta",
+        birthDate: "1965-12-10",
+        retirementAge: 58,
+        retirementDate: "2023-12-10",
+        photo: "https://randomuser.me/api/portraits/men/1.jpg"
+      },
+      {
+        id: 2,
+        name: "Dewi Sartika, S.Pd",
+        nip: "197005101995032002",
+        rank: "Penata",
+        group: "III/c",
+        position: "Guru Mapel",
+        tmt: "1995-03-01",
+        status: "PNS",
+        gender: "Perempuan",
+        religion: "Islam",
+        subject: "Bahasa Indonesia",
+        birthPlace: "Bandung",
+        birthDate: "1970-05-10",
+        retirementAge: 58,
+        retirementDate: "2028-05-10",
+        photo: "https://randomuser.me/api/portraits/women/1.jpg"
+      },
+      {
+        id: 3,
+        name: "Budi Santoso, S.Pd",
+        nip: "198004102005011002",
+        rank: "Penata Muda Tingkat I",
+        group: "III/b",
+        position: "Guru",
+        tmt: "2005-01-01",
+        status: "Honor Sekolah",
+        gender: "Laki-laki",
+        religion: "Kristen",
+        subject: "IPA",
+        birthPlace: "Surabaya",
+        birthDate: "1980-04-10",
+        retirementAge: "-",
+        retirementDate: "-",
+        photo: "https://randomuser.me/api/portraits/men/2.jpg"
+      }
+    ];
+
+    // Function to update retirement age based on status
+    function updateRetirementAge() {
+      const status = document.getElementById('status').value;
+      const retirementAgeSelect = document.getElementById('retirementAge');
+      
+      if (status === 'PNS') {
+        retirementAgeSelect.value = '58';
+      } else if (status === 'PPPK') {
+        retirementAgeSelect.value = '60';
+      } else {
+        retirementAgeSelect.value = '-';
+      }
+      
+      calculateRetirementDate();
+    }
+
+    // Function to calculate retirement date
+    function calculateRetirementDate() {
+      const birthDate = document.getElementById('birthDate').value;
+      const retirementAge = document.getElementById('retirementAge').value;
+      
+      if (birthDate && retirementAge && retirementAge !== '-') {
+        const birthDateObj = new Date(birthDate);
+        const retirementYear = birthDateObj.getFullYear() + parseInt(retirementAge);
+        const retirementDate = new Date(birthDateObj);
+        retirementDate.setFullYear(retirementYear);
+        
+        // Format date to YYYY-MM-DD
+        const formattedDate = retirementDate.toISOString().split('T')[0];
+        document.getElementById('retirementDate').value = formattedDate;
+      } else {
+        document.getElementById('retirementDate').value = '-';
+      }
+    }
+
+    // Calculate remaining time until retirement
+    function calculateRemainingTime(retirementDate) {
+      if (!retirementDate || retirementDate === '-') return '-';
+      
+      const today = new Date();
+      const retireDate = new Date(retirementDate);
+      const diffTime = retireDate - today;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      if (diffDays <= 0) return 'Sudah pensiun';
+      
+      const years = Math.floor(diffDays / 365);
+      const months = Math.floor((diffDays % 365) / 30);
+      
+      return `${years > 0 ? years + ' tahun ' : ''}${months} bulan`;
+    }
+
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', function() {
+      updateTeacherTable();
+      updateTotalTeachers();
+      updateDashboardData();
+      updateJamDigital();
+      setupTeacherSearch();
+    });
+
+    // Update teacher table with data
+    function updateTeacherTable(filteredTeachers = null) {
+      const tableBody = document.getElementById('teacherTableBody');
+      tableBody.innerHTML = '';
+
+      const teachersToDisplay = filteredTeachers || teachers;
+
+      teachersToDisplay.forEach(teacher => {
+        let statusClass = '';
+        if (teacher.status === 'PNS') statusClass = 'status-pns';
+        else if (teacher.status === 'PPPK') statusClass = 'status-pppk';
+        else statusClass = 'status-honor';
+
+        // Format dates
+        const tmtDate = teacher.tmt ? new Date(teacher.tmt).toLocaleDateString('id-ID') : '-';
+        const birthDate = teacher.birthDate ? new Date(teacher.birthDate).toLocaleDateString('id-ID') : '-';
+        const retirementDate = teacher.retirementDate && teacher.retirementDate !== '-' ? 
+          new Date(teacher.retirementDate).toLocaleDateString('id-ID') : '-';
+        const retirementAge = teacher.retirementAge && teacher.retirementAge !== '-' ? 
+          `${teacher.retirementAge} tahun` : '-';
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="px-6 py-4 whitespace-nowrap">
+            <img src="${teacher.photo}" alt="${teacher.name}" class="teacher-photo">
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm font-medium text-gray-900">${teacher.name}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-500">${teacher.nip || '-'}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-500">${teacher.rank} (${teacher.group})</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-500">${teacher.position || '-'}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-500">${tmtDate}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <span class="status-badge ${statusClass}">${teacher.status}</span>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-500">${teacher.subject}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-500">${teacher.birthPlace}, ${birthDate}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-500">${retirementAge}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-500">${retirementDate}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+            <button onclick="viewTeacher(${teacher.id})" class="text-blue-600 hover:text-blue-900 mr-2" title="Lihat">
+              <i class="fas fa-eye"></i>
+            </button>
+            <button onclick="editTeacher(${teacher.id})" class="text-yellow-600 hover:text-yellow-900 mr-2" title="Edit">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button onclick="confirmDeleteTeacher(${teacher.id})" class="text-red-600 hover:text-red-900" title="Hapus">
+              <i class="fas fa-trash"></i>
+            </button>
+          </td>
+        `;
+        tableBody.appendChild(row);
+      });
+      
+      // Update dashboard data
+      updateDashboardData();
+    }
+
+    // Update total teacher count
+    function updateTotalTeachers() {
+      document.getElementById('totalTeachers').textContent = teachers.length;
+    }
+
+    // Update dashboard data in localStorage
+    function updateDashboardData() {
+      // Save teacher data
+      localStorage.setItem('teachers', JSON.stringify(teachers));
+      localStorage.setItem('teacherCount', teachers.length);
+      
+      // Count teachers by status
+      const statusCounts = {
+        PNS: teachers.filter(t => t.status === 'PNS').length,
+        PPPK: teachers.filter(t => t.status === 'PPPK').length,
+        'Honor Sekolah': teachers.filter(t => t.status === 'Honor Sekolah').length,
+        'Honor Daerah': teachers.filter(t => t.status === 'Honor Daerah').length
+      };
+      
+      localStorage.setItem('teacherStatusData', JSON.stringify(statusCounts));
+      
+      // Update pensiun data for dashboard
+      updatePensiunData();
+    }
+    
+    // Update data for pensiun table in dashboard
+    function updatePensiunData() {
+      const today = new Date();
+      const fiveYearsLater = new Date();
+      fiveYearsLater.setFullYear(today.getFullYear() + 5);
+      
+      const teachersNearRetirement = teachers.filter(teacher => {
+        if (!teacher.retirementDate || teacher.retirementDate === '-') return false;
+        
+        const retireDate = new Date(teacher.retirementDate);
+        return retireDate <= fiveYearsLater && retireDate >= today;
+      }).sort((a, b) => {
+        const dateA = new Date(a.retirementDate);
+        const dateB = new Date(b.retirementDate);
+        return dateA - dateB;
+      });
+      
+      localStorage.setItem('teachersNearRetirement', JSON.stringify(teachersNearRetirement));
+    }
+
+    // Refresh data
+    function refreshData() {
+      teachers = JSON.parse(localStorage.getItem('teachers')) || [];
+      updateTeacherTable();
+      updateTotalTeachers();
+      Swal.fire({
+        position: 'center',
+        icon: 'success',
+        title: 'Data telah diperbarui',
+        showConfirmButton: false,
+        timer: 1500
+      });
+    }
+
+    // Modal functions
+    function showAddModal() {
+      document.getElementById('modalTitle').textContent = 'Tambah Data Guru';
+      document.getElementById('teacherForm').reset();
+      document.getElementById('teacherId').value = '';
+      document.getElementById('teacherModal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('teacherModal').classList.add('hidden');
+    }
+
+    function closeViewModal() {
+      document.getElementById('viewModal').classList.add('hidden');
+    }
+
+    // View teacher details
+    function viewTeacher(id) {
+      const teacher = teachers.find(t => t.id === id);
+      if (teacher) {
+        document.getElementById('viewPhoto').src = teacher.photo;
+        document.getElementById('viewName').textContent = teacher.name;
+        document.getElementById('viewNip').textContent = teacher.nip ? `NIP: ${teacher.nip}` : 'NIP: -';
+        document.getElementById('viewRankGroup').textContent = `${teacher.rank} (${teacher.group})`;
+        document.getElementById('viewPosition').textContent = teacher.position || '-';
+        document.getElementById('viewTmt').textContent = teacher.tmt ? new Date(teacher.tmt).toLocaleDateString('id-ID') : '-';
+        document.getElementById('viewStatus').textContent = teacher.status;
+        document.getElementById('viewGender').textContent = teacher.gender;
+        document.getElementById('viewReligion').textContent = teacher.religion;
+        document.getElementById('viewBirthInfo').textContent = `${teacher.birthPlace}, ${teacher.birthDate ? new Date(teacher.birthDate).toLocaleDateString('id-ID') : '-'}`;
+        document.getElementById('viewRetirementAge').textContent = teacher.retirementAge && teacher.retirementAge !== '-' ? `${teacher.retirementAge} tahun` : '-';
+        document.getElementById('viewRetirementDate').textContent = teacher.retirementDate && teacher.retirementDate !== '-' ? new Date(teacher.retirementDate).toLocaleDateString('id-ID') : '-';
+        document.getElementById('viewSubject').textContent = teacher.subject;
+        document.getElementById('viewModal').classList.remove('hidden');
+      }
+    }
+
+    // Edit teacher
+    function editTeacher(id) {
+      const teacher = teachers.find(t => t.id === id);
+      if (teacher) {
+        document.getElementById('modalTitle').textContent = 'Edit Data Guru';
+        document.getElementById('teacherId').value = teacher.id;
+        document.getElementById('name').value = teacher.name;
+        document.getElementById('nip').value = teacher.nip;
+        document.getElementById('rank').value = teacher.rank;
+        document.getElementById('group').value = teacher.group;
+        document.getElementById('position').value = teacher.position || '';
+        document.getElementById('tmt').value = teacher.tmt;
+        document.getElementById('status').value = teacher.status;
+        document.getElementById('gender').value = teacher.gender;
+        document.getElementById('religion').value = teacher.religion;
+        document.getElementById('subject').value = teacher.subject;
+        document.getElementById('birthPlace').value = teacher.birthPlace;
+        document.getElementById('birthDate').value = teacher.birthDate;
+        document.getElementById('retirementAge').value = teacher.retirementAge || 
+          (teacher.status === 'PPPK' ? '60' : teacher.status === 'PNS' ? '58' : '-');
+        document.getElementById('retirementDate').value = teacher.retirementDate || '-';
+        document.getElementById('teacherModal').classList.remove('hidden');
+      }
+    }
+
+    // Confirm delete teacher
+    function confirmDeleteTeacher(id) {
+      const teacher = teachers.find(t => t.id === id);
+      Swal.fire({
+        title: 'Apakah Anda yakin?',
+        html: `Anda akan menghapus data <strong>${teacher.name}</strong>`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Ya, hapus!',
+        cancelButtonText: 'Batal'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          deleteTeacher(id);
+        }
+      });
+    }
+
+    // Delete teacher
+    function deleteTeacher(id) {
+      teachers = teachers.filter(teacher => teacher.id !== id);
+      localStorage.setItem('teachers', JSON.stringify(teachers));
+      updateTeacherTable();
+      updateTotalTeachers();
+      updateDashboardData();
+      
+      Swal.fire(
+        'Dihapus!',
+        'Data guru telah dihapus.',
+        'success'
+      );
+    }
+
+    // Handle form submission
+    document.getElementById('teacherForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const id = document.getElementById('teacherId').value;
+      const name = document.getElementById('name').value;
+      const nip = document.getElementById('nip').value;
+      const rank = document.getElementById('rank').value;
+      const group = document.getElementById('group').value;
+      const position = document.getElementById('position').value;
+      const tmt = document.getElementById('tmt').value;
+      const status = document.getElementById('status').value;
+      const gender = document.getElementById('gender').value;
+      const religion = document.getElementById('religion').value;
+      const subject = document.getElementById('subject').value;
+      const birthPlace = document.getElementById('birthPlace').value;
+      const birthDate = document.getElementById('birthDate').value;
+      const retirementAge = document.getElementById('retirementAge').value;
+      const retirementDate = document.getElementById('retirementDate').value;
+      
+      const photoInput = document.getElementById('photo');
+      let photo = id ? teachers.find(t => t.id == id)?.photo : 'https://via.placeholder.com/150';
+      
+      if (photoInput.files.length > 0) {
+        photo = URL.createObjectURL(photoInput.files[0]);
+      }
+      
+      if (id) {
+        // Update existing teacher
+        const index = teachers.findIndex(t => t.id == id);
+        teachers[index] = { 
+          ...teachers[index],
+          name, 
+          nip, 
+          rank, 
+          group, 
+          position,
+          tmt,
+          status,
+          gender, 
+          religion, 
+          subject, 
+          birthPlace,
+          birthDate,
+          retirementAge,
+          retirementDate,
+          photo 
+        };
+      } else {
+        // Add new teacher
+        const newId = teachers.length > 0 ? Math.max(...teachers.map(t => t.id)) + 1 : 1;
+        teachers.push({ 
+          id: newId, 
+          name, 
+          nip, 
+          rank, 
+          group, 
+          position,
+          tmt,
+          status,
+          gender, 
+          religion, 
+          subject, 
+          birthPlace,
+          birthDate,
+          retirementAge,
+          retirementDate,
+          photo 
+        });
+      }
+      
+      localStorage.setItem('teachers', JSON.stringify(teachers));
+      updateTeacherTable();
+      updateTotalTeachers();
+      updateDashboardData();
+      closeModal();
+      
+      Swal.fire(
+        'Berhasil!',
+        `Data guru ${name} telah ${id ? 'diperbarui' : 'ditambahkan'}.`,
+        'success'
+      );
+    });
+
+    // Export to PDF
+    function exportToPDF() {
+      const doc = new jsPDF();
+      const title = "DATA GURU";
+      const schoolName = "Nama Sekolah Anda";
+      const date = new Date().toLocaleDateString('id-ID');
+      
+      // Add title and school info
+      doc.setFontSize(16);
+      doc.text(title, 105, 15, { align: 'center' });
+      doc.setFontSize(12);
+      doc.text(schoolName, 105, 22, { align: 'center' });
+      doc.text(`Tanggal: ${date}`, 105, 29, { align: 'center' });
+      
+      // Prepare table data
+      const headers = [["No", "Nama", "NIP", "Pangkat/Gol", "Jabatan", "TMT", "Status", "Mapel", "Tempat/Tgl Lahir", "Usia Pensiun", "Tgl Pensiun"]];
+      const data = teachers.map((teacher, index) => [
+        index + 1,
+        teacher.name,
+        teacher.nip || '-',
+        `${teacher.rank} (${teacher.group})`,
+        teacher.position || '-',
+        teacher.tmt ? new Date(teacher.tmt).toLocaleDateString('id-ID') : '-',
+        teacher.status,
+        teacher.subject,
+        `${teacher.birthPlace}, ${teacher.birthDate ? new Date(teacher.birthDate).toLocaleDateString('id-ID') : '-'}`,
+        teacher.retirementAge && teacher.retirementAge !== '-' ? `${teacher.retirementAge} tahun` : '-',
+        teacher.retirementDate && teacher.retirementDate !== '-' ? new Date(teacher.retirementDate).toLocaleDateString('id-ID') : '-'
+      ]);
+
+      // Add table
+      doc.autoTable({
+        head: headers,
+        body: data,
+        startY: 35,
+        styles: {
+          cellPadding: 2,
+          fontSize: 7,
+          valign: 'middle',
+          halign: 'left'
+        },
+        headStyles: {
+          fillColor: [59, 130, 246],
+          textColor: 255,
+          fontStyle: 'bold'
+        },
+        alternateRowStyles: {
+          fillColor: [241, 245, 249]
+        },
+        margin: { left: 5, right: 5 },
+        tableWidth: 'auto'
+      });
+
+      doc.save(`data_guru_${new Date().toISOString().slice(0,10)}.pdf`);
+    }
+
+    // Search functionality
+    function setupTeacherSearch() {
+      const searchInput = document.getElementById('searchInput');
+      if (searchInput) {
+        searchInput.addEventListener('input', function(e) {
+          const searchTerm = e.target.value.toLowerCase();
+          const filteredTeachers = teachers.filter(teacher => 
+            teacher.name.toLowerCase().includes(searchTerm) || 
+            (teacher.nip && teacher.nip.toLowerCase().includes(searchTerm)) ||
+            teacher.subject.toLowerCase().includes(searchTerm) ||
+            teacher.status.toLowerCase().includes(searchTerm) ||
+            teacher.rank.toLowerCase().includes(searchTerm) ||
+            teacher.group.toLowerCase().includes(searchTerm) ||
+            (teacher.position && teacher.position.toLowerCase().includes(searchTerm)) ||
+            (teacher.birthPlace && teacher.birthPlace.toLowerCase().includes(searchTerm))
+          );
+          updateTeacherTable(filteredTeachers);
+        });
+      }
+    }
+
+    // Toggle sidebar for mobile only
+    function toggleSidebarMobile() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('hidden');
+      sidebar.classList.toggle('md:flex');
+    }
+
+    // Toggle submenu
+    function toggleSubmenu(id) {
+      const submenu = document.getElementById(id);
+      const icon = document.getElementById('icon-' + id);
+      submenu.classList.toggle('hidden');
+      icon.classList.toggle('rotate-180');
+    }
+
+    // Digital clock
+    function updateJamDigital() {
+      const jam = document.getElementById("jamDigital");
+      const now = new Date();
+      const options = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
+      jam.textContent = now.toLocaleTimeString('id-ID', options);
+    }
+    setInterval(updateJamDigital, 1000);
+
+    // Confirm logout
+    function confirmLogout() {
+      Swal.fire({
+        title: 'Keluar dari sistem?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Ya, keluar',
+        cancelButtonText: 'Batal'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = 'pesan.html';
+        }
+      });
+    }
+  </script>
+</body>
+</html>

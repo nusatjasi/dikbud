@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rombongan Belajar - Admin Sekolah</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .marquee {
+      white-space: nowrap;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+    .marquee span {
+      display: inline-block;
+      padding-left: 100%;
+      animation: marquee 15s linear infinite;
+    }
+    @keyframes marquee {
+      0%   { transform: translate(0, 0); }
+      100% { transform: translate(-100%, 0); }
+    }
+    .class-card {
+      transition: all 0.3s ease;
+    }
+    .class-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body class="bg-gray-100 font-sans">
+  <div id="app" class="flex h-screen">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="w-64 bg-blue-800 text-white flex flex-col p-4 space-y-4 transition-all duration-300 relative">
+      <img src="logo.png" alt="Logo" class="w-16 h-16 mx-auto mb-2">
+      <h1 class="text-2xl font-bold mb-6 text-center">Admin Sekolah</h1>
+      <nav class="flex-1 space-y-2">
+        <div class="flex items-center gap-2">
+          <i class="fas fa-home w-5 h-5"></i>
+          <a href="index.html" class="font-semibold hover:underline">Beranda</a>
+        </div>
+        <div>
+          <button onclick="toggleSubmenu('guruSub')" class="font-semibold w-full text-left flex items-center justify-between">
+            <span class="flex items-center gap-2">
+              <i class="fas fa-chalkboard-teacher w-5 h-5"></i>
+              Guru & Tendik
+            </span>
+            <svg class="w-4 h-4 transform transition-transform" id="icon-guruSub" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <ul id="guruSub" class="ml-4 space-y-1 hidden">
+            <li><a href="guru.html" class="hover:underline">Data Guru</a></li>
+            <li><a href="tendik.html" class="hover:underline">Data Tendik</a></li>
+          </ul>
+        </div>
+        <div>
+          <button onclick="toggleSubmenu('siswaSub')" class="font-semibold w-full text-left flex items-center justify-between">
+            <span class="flex items-center gap-2">
+              <i class="fas fa-user-graduate w-5 h-5"></i>
+              Siswa
+            </span>
+            <svg class="w-4 h-4 transform transition-transform" id="icon-siswaSub" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <ul id="siswaSub" class="ml-4 space-y-1 hidden">
+            <li><a href="kelas7.html" class="hover:underline">Kelas 7</a></li>
+            <li><a href="kelas8.html" class="hover:underline">Kelas 8</a></li>
+            <li><a href="kelas9.html" class="hover:underline">Kelas 9</a></li>
+          </ul>
+        </div>
+        <div class="flex items-center gap-2">
+          <i class="fas fa-users w-5 h-5"></i>
+          <a href="rombel.html" class="font-semibold hover:underline font-bold">Rombongan Belajar</a>
+        </div>
+        <div class="flex items-center gap-2">
+          <i class="fas fa-school w-5 h-5"></i>
+          <a href="profil.html" class="font-semibold hover:underline">Profil Sekolah</a>
+        </div>
+        <div class="flex items-center gap-2">
+          <i class="fas fa-info-circle w-5 h-5"></i>
+          <a href="informasi.html" class="font-semibold hover:underline">Informasi</a>
+        </div>
+        <div class="flex items-center gap-2">
+          <i class="fas fa-cog w-5 h-5"></i>
+          <a href="pengaturan.html" class="font-semibold hover:underline">Pengaturan</a>
+        </div>
+        <div>
+            <button 
+              onclick="window.location.href='pesan.html'" 
+              class="mt-6 bg-red-500 hover:bg-red-600 px-3 py-1 rounded flex items-center gap-2">
+              <i class="fas fa-sign-out-alt w-4 h-4"></i> Keluar
+            </button>
+          </div>
+          
+      </nav>
+      <footer class="text-xs text-center py-2 w-full absolute bottom-0 left-0 text-white/50">
+        <div class="w-full text-center">&copy; 2025 Hak Cipta Admin Sekolah</div>
+      </footer>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col">
+      <!-- Navbar -->
+      <header class="flex items-center justify-between bg-white px-4 py-2 shadow">
+        <div class="flex items-center gap-2">
+          <button onclick="toggleSidebar()" class="text-blue-800 focus:outline-none">
+            <i class="fas fa-bars text-xl"></i>
+          </button>
+          <img src="logo.png" alt="Logo Sekolah" class="w-8 h-8">
+          <span class="text-lg font-bold text-blue-800">Rombongan Belajar</span>
+        </div>
+        <div class="flex items-center gap-4">
+          <div id="jamDigital" class="text-blue-800 text-xl font-bold"></div>
+          <a href="pesan.html" class="relative">
+            <i class="fas fa-bell text-xl text-blue-800"></i>
+            <span class="absolute top-0 right-0 inline-block w-2 h-2 bg-red-600 rounded-full"></span>
+          </a>
+        </div>
+      </header>
+
+      <!-- Running Text -->
+      <div class="bg-blue-100 text-blue-800 text-sm px-4 py-1 marquee">
+        <span>Manajemen Rombongan Belajar - Data kelas dan jumlah siswa</span>
+      </div>
+
+      <!-- Main Content -->
+      <main class="flex-1 p-6 overflow-auto">
+        <!-- Class Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <!-- Total Classes Card -->
+          <div class="bg-white rounded-xl shadow p-6 class-card">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-gray-500">Total Rombel</p>
+                <h3 class="text-2xl font-bold" id="totalClasses">0</h3>
+              </div>
+              <div class="bg-blue-100 p-3 rounded-full">
+                <i class="fas fa-users text-blue-600 text-xl"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Total Students Card -->
+          <div class="bg-white rounded-xl shadow p-6 class-card">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-gray-500">Total Siswa</p>
+                <h3 class="text-2xl font-bold" id="totalStudents">0</h3>
+              </div>
+              <div class="bg-green-100 p-3 rounded-full">
+                <i class="fas fa-user-graduate text-green-600 text-xl"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Total Teachers Card -->
+          <div class="bg-white rounded-xl shadow p-6 class-card">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-gray-500">Total Guru</p>
+                <h3 class="text-2xl font-bold" id="totalTeachers">0</h3>
+              </div>
+              <div class="bg-purple-100 p-3 rounded-full">
+                <i class="fas fa-chalkboard-teacher text-purple-600 text-xl"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Class Table -->
+        <div class="bg-white rounded-xl shadow overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-blue-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Kelas</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Wali Kelas</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Jumlah Siswa</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Aksi</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200" id="classTableBody">
+                <!-- Data will be inserted here by JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- View Class Modal -->
+  <div id="viewModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 lg:w-1/3 shadow-lg rounded-md bg-white">
+      <div class="flex justify-between items-center border-b pb-2">
+        <h3 class="text-lg font-semibold text-blue-800">Detail Kelas</h3>
+        <button onclick="closeViewModal()" class="text-gray-500 hover:text-gray-700">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="mt-4 space-y-4">
+        <div class="flex flex-col items-center">
+          <h4 id="viewClassName" class="text-xl font-bold text-center"></h4>
+        </div>
+        <div class="grid grid-cols-2 gap-4 border-t pt-4">
+          <div>
+            <p class="text-sm text-gray-500">Wali Kelas</p>
+            <p id="viewClassTeacher" class="font-medium"></p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500">Jumlah Siswa</p>
+            <p id="viewClassStudents" class="font-medium"></p>
+          </div>
+          <div class="col-span-2">
+            <p class="text-sm text-gray-500">Siswa Laki-laki</p>
+            <p id="viewClassMale" class="font-medium"></p>
+          </div>
+          <div class="col-span-2">
+            <p class="text-sm text-gray-500">Siswa Perempuan</p>
+            <p id="viewClassFemale" class="font-medium"></p>
+          </div>
+        </div>
+        <div class="flex justify-end pt-4 border-t">
+          <button onclick="closeViewModal()" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded">Tutup</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Load data from localStorage
+    let students = JSON.parse(localStorage.getItem('students')) || [];
+    let teachers = JSON.parse(localStorage.getItem('teachers')) || [];
+    
+    // Sample class data with homeroom teachers
+    let classes = [
+      { id: 1, name: "7A", teacherId: 1 },
+      { id: 2, name: "7B", teacherId: 2 },
+      { id: 3, name: "7C", teacherId: 3 },
+      { id: 4, name: "8A", teacherId: 1 },
+      { id: 5, name: "8B", teacherId: 2 },
+      { id: 6, name: "9A", teacherId: 3 },
+      { id: 7, name: "9B", teacherId: 1 }
+    ];
+
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', function() {
+      updateClassTable();
+      updateTotalCounts();
+      updateJamDigital();
+      
+      // Add sample data if empty
+      if (students.length === 0) {
+        addSampleData();
+      }
+    });
+
+    // Add sample data if needed
+    function addSampleData() {
+      // This would be populated from your existing sample data in kelas7.html
+      // Just ensuring we have some data to work with
+      const sampleStudents = [
+        {
+          id: 1,
+          name: "Andi Wijaya",
+          nis: "202307001",
+          gender: "Laki-laki",
+          class: "7A",
+          religion: "Islam",
+          status: "Aktif",
+          birthDate: "2010-05-15",
+          address: "Jl. Merdeka No. 10",
+          parentName: "Budi Wijaya",
+          parentPhone: "081234567890",
+          photo: "https://randomuser.me/api/portraits/men/1.jpg"
+        },
+        {
+          id: 2,
+          name: "Siti Rahayu",
+          nis: "202307002",
+          gender: "Perempuan",
+          class: "7B",
+          religion: "Islam",
+          status: "Aktif",
+          birthDate: "2010-08-20",
+          address: "Jl. Sudirman No. 5",
+          parentName: "Ahmad Rahayu",
+          parentPhone: "081298765432",
+          photo: "https://randomuser.me/api/portraits/women/1.jpg"
+        },
+        {
+          id: 3,
+          name: "Budi Santoso",
+          nis: "202307003",
+          gender: "Laki-laki",
+          class: "7C",
+          religion: "Kristen",
+          status: "Aktif",
+          birthDate: "2010-03-10",
+          address: "Jl. Diponegoro No. 15",
+          parentName: "Joko Santoso",
+          parentPhone: "081312345678",
+          photo: "https://randomuser.me/api/portraits/men/2.jpg"
+        }
+      ];
+      
+      students = sampleStudents;
+      localStorage.setItem('students', JSON.stringify(students));
+      updateDashboardCounts();
+    }
+
+    // Update class table
+    function updateClassTable() {
+      const tableBody = document.getElementById('classTableBody');
+      tableBody.innerHTML = '';
+
+      classes.forEach(classItem => {
+        // Count students in this class
+        const studentsInClass = students.filter(student => student.class === classItem.name);
+        const maleStudents = studentsInClass.filter(student => student.gender === "Laki-laki").length;
+        const femaleStudents = studentsInClass.filter(student => student.gender === "Perempuan").length;
+        
+        // Find homeroom teacher
+        const teacher = teachers.find(t => t.id === classItem.teacherId);
+        const teacherName = teacher ? teacher.name : "Belum ditentukan";
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm font-medium text-gray-900">${classItem.name}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-500">${teacherName}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-500">${studentsInClass.length} siswa</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+            <button onclick="viewClass('${classItem.id}')" class="text-blue-600 hover:text-blue-900 mr-2">
+              <i class="fas fa-eye"></i> Lihat
+            </button>
+          </td>
+        `;
+        tableBody.appendChild(row);
+      });
+    }
+
+    // Update total counts
+    function updateTotalCounts() {
+      // Total classes
+      document.getElementById('totalClasses').textContent = classes.length;
+      
+      // Total students (from all classes)
+      document.getElementById('totalStudents').textContent = students.length;
+      
+      // Total teachers
+      document.getElementById('totalTeachers').textContent = teachers.length;
+      
+      // Update dashboard counts in localStorage
+      updateDashboardCounts();
+    }
+
+    // Update dashboard counts in localStorage
+    function updateDashboardCounts() {
+      localStorage.setItem('classCount', classes.length);
+      localStorage.setItem('studentCount', students.length);
+      localStorage.setItem('teacherCount', teachers.length);
+      
+      // Trigger storage event to update dashboard
+      window.dispatchEvent(new Event('storage'));
+    }
+
+    // View class details
+    function viewClass(id) {
+      const classItem = classes.find(c => c.id == id);
+      if (classItem) {
+        const studentsInClass = students.filter(student => student.class === classItem.name);
+        const maleStudents = studentsInClass.filter(student => student.gender === "Laki-laki").length;
+        const femaleStudents = studentsInClass.filter(student => student.gender === "Perempuan").length;
+        
+        // Find homeroom teacher
+        const teacher = teachers.find(t => t.id === classItem.teacherId);
+        const teacherName = teacher ? teacher.name : "Belum ditentukan";
+
+        document.getElementById('viewClassName').textContent = `Kelas ${classItem.name}`;
+        document.getElementById('viewClassTeacher').textContent = teacherName;
+        document.getElementById('viewClassStudents').textContent = `${studentsInClass.length} siswa`;
+        document.getElementById('viewClassMale').textContent = `${maleStudents} siswa`;
+        document.getElementById('viewClassFemale').textContent = `${femaleStudents} siswa`;
+        document.getElementById('viewModal').classList.remove('hidden');
+      }
+    }
+
+    function closeViewModal() {
+      document.getElementById('viewModal').classList.add('hidden');
+    }
+
+    // Digital clock
+    function updateJamDigital() {
+      const jam = document.getElementById("jamDigital");
+      const now = new Date();
+      const options = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
+      jam.textContent = now.toLocaleTimeString('id-ID', options);
+    }
+    setInterval(updateJamDigital, 1000);
+
+    // Toggle sidebar
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('w-64');
+      sidebar.classList.toggle('w-0');
+      sidebar.classList.toggle('hidden');
+    }
+
+    // Toggle submenu
+    function toggleSubmenu(id) {
+      const submenu = document.getElementById(id);
+      const icon = document.getElementById('icon-' + id);
+      submenu.classList.toggle('hidden');
+      icon.classList.toggle('rotate-180');
+    }
+
+    // Logout function
+    function logout() {
+      Swal.fire({
+        title: 'Keluar dari sistem?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Ya, keluar',
+        cancelButtonText: 'Batal'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = 'login.html';
+        }
+      });
+    }
+  </script>
+</body>
+</html>

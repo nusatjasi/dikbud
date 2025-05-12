@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pesan Keluar</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .icon {
+            font-size: 50px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        p {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .thank-you {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-top: 30px;
+        }
+        .options {
+            margin-top: 30px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .btn-yes {
+            background-color: #2ecc71;
+            color: white;
+        }
+        .btn-no {
+            background-color: #e74c3c;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">😊</div>
+        <h1>Informasi Keluar</h1>
+        <p>Jika Anda ingin keluar, silakan kembali ke menu beranda terlebih dahulu, lalu pilih opsi keluar.</p>
+        
+        <div class="thank-you">TERIMA KASIH</div>
+        <div style="margin: 20px 0; font-size: 24px;">🙏</div>
+        <p>Maaf atas ketidaknyamanannya.</p>
+        
+        <div class="options">
+            <p>Apakah Anda ingin kembali ke halaman beranda?</p>
+            <a href="index.html" class="btn btn-yes">Ya</a>
+            <button onclick="goBack()" class="btn btn-no">Tidak</button>
+        </div>
+    </div>
+
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+</body>
+</html>
